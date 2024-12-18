@@ -51,7 +51,8 @@ python app.py
 
 **使用 Docker：**
 ```bash
-docker run -d \--name space-manager \
+docker run -d \
+    --name hfspace-manager \
     -p 5000:5000 \
     -e USERNAME=your_username \
     -e PASSWORD=your_password \
