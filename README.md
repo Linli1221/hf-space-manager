@@ -115,7 +115,7 @@ curl -X POST "http://localhost:5000/api/v1/action/hf_token_here/username/space-n
 | HF_TOKENS | HuggingFace tokens（逗号分隔） | 是 |
 | API_KEY | API访问密钥 | 是 |
 
-###缓存配置
+### 缓存配置
 
 - 默认缓存时间：5 分钟
 - 后台自动更新间隔：5 分钟
