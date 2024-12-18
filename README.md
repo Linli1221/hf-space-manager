@@ -13,6 +13,11 @@ HF Space Manager 是一个用于管理 Hugging Face Spaces 的 Web 应用程序�
 - 🔌 RESTful API 支持
 - 💾 数据缓存机制
 
+## 界面预览
+![index](/preview/index.png "index")
+
+![dashboard](/preview/dashboard.png "dashboard")
+
 ## 快速开始
 
 ### 环境要求
