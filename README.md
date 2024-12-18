@@ -73,46 +73,30 @@ Authorization: Bearer your_api_key
 
 #### 1. 获取所有 Spaces
 ```bash
-GET /api/v1/space
-Content-Type: application/json
-Authorization: Bearer API_KEY
-
-{
-    "token": "HF_TOKEN"
-}
+curl -X GET "http://localhost:5000/api/v1/info/hf_token_here" \
+-H "Content-Type: application/json" \
+-H "Authorization: Bearer API_KEY"
 ```
 
 #### 2. 获取特定 Space 信息
 ```bash
-GET /api/v1/space/{space_id}
-Content-Type: application/json
-Authorization: Bearer API_KEY
-
-{
-    "token": "HF_TOKEN"
-}
+curl -X GET "http://localhost:5000/api/v1/info/hf_token_here/username/space-name" \
+-H "Content-Type: application/json" \
+-H "Authorization: Bearer API_KEY"
 ```
 
 #### 3. 重启 Space
 ```bash
-POST /api/v1/{space_id}/restart
-Content-Type: application/json
-Authorization: Bearer API_KEY
-
-{
-    "token": "HF_TOKEN"
-}
+curl -X POST "http://localhost:5000/api/v1/action/hf_token_here/username/space-name/restart" \
+-H "Content-Type: application/json" \
+-H "Authorization: Bearer API_KEY"
 ```
 
 #### 4. 重建 Space
 ```bash
-POST /api/v1/{space_id}/rebuild
-Content-Type: application/json
-Authorization: Bearer API_KEY
-
-{
-    "token": "HF_TOKEN"
-}
+curl -X POST "http://localhost:5000/api/v1/action/hf_token_here/username/space-name/restart" \
+-H "Content-Type: application/json" \
+-H "Authorization: Bearer API_KEY"
 ```
 
 ## 配置说明
