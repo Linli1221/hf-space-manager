@@ -347,7 +347,35 @@
         <a href="https://opensource.org/license/mit">MIT 协议</a>
     </footer>
 
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js"></script>
     <script>
+        // 连接 WebSocket
+        const socket = io();
+
+        socket.on('connect', () => {
+            console.log('Connected to server');
+        });
+
+        socket.on('disconnect', () => {
+            console.log('Disconnected from server');
+        });
+
+        // 当收到缓存更新通知时刷新数据
+        socket.on('spaces_updated', (data) => {
+            updateSpaceStatuses();
+        });
+
+        // 页面可见性变化处理
+        document.addEventListener('visibilitychange', function() {
+            if (document.hidden) {
+                // 页面隐藏时断开连接
+                socket.disconnect();
+            } else {
+                // 页面可见时重新连接
+                socket.connect();
+            }
+        });
+        
         // 页面加载完成后隐藏加载动画
         window.addEventListener('load', function() {
             document.getElementById('loading').style.display = 'none';
@@ -376,8 +404,8 @@
             }
         }
 
-        // 每60秒更新一次状态
-        setInterval(updateSpaceStatuses, 60000);
+        // 每30秒更新一次状态
+        setInterval(updateSpaceStatuses, 30000);
     </script>
 </body>
 </html>
