@@ -1,4 +1,5 @@
 from flask import Flask, render_template, request, redirect, url_for, session, jsonify
+from flask_socketio import SocketIO, emit, disconnect
 from dotenv import load_dotenv
 from huggingface_hub import HfApi
 from functools import wraps
@@ -22,6 +23,7 @@ load_dotenv()
 app = Flask(__name__)
 app.secret_key = os.urandom(24)
 app.register_blueprint(api_blueprint)
+socketio = SocketIO(app)
 
 # 缓存管理
 class SpaceCache:
@@ -29,6 +31,7 @@ class SpaceCache:
         self.spaces = {}
         self.last_update = None
         self.lock = threading.Lock()
+        self.active_clients = set()  # 跟踪活动的客户端
 
     def update_all(self, spaces_data):
         with self.lock:
@@ -44,7 +47,36 @@ class SpaceCache:
             return True
         return datetime.now() - self.last_update > timedelta(minutes=expire_minutes)
 
+    def add_client(self, client_id):
+        with self.lock:
+            self.active_clients.add(client_id)
+
+    def remove_client(self, client_id):
+        with self.lock:
+            self.active_clients.discard(client_id)
+
+    def has_active_clients(self):
+        with self.lock:
+            return len(self.active_clients) > 0
+
 space_cache = SpaceCache()
+
+# WebSocket 事件处理
+@socketio.on('connect')
+def handle_connect():
+    if 'authenticated' not in session or not session['authenticated']:
+        disconnect()
+        return
+
+    client_id = request.sid
+    space_cache.add_client(client_id)
+    logger.info(f"Client connected: {client_id}")
+
+@socketio.on('disconnect')
+def handle_disconnect():
+    client_id = request.sid
+    space_cache.remove_client(client_id)
+    logger.info(f"Client disconnected: {client_id}")
 
 # 登录验证装饰器
 def login_required(f):
@@ -127,17 +159,21 @@ def get_all_user_spaces():
     return all_spaces
 
 # 后台更新缓存的函数
-def background_cache_update():
+def update_cache_if_needed():
+    """在有活动客户端时更新缓存"""
     while True:
         try:
-            _ = get_all_user_spaces()
-            time.sleep(300)  # 每5分钟更新一次
+            if space_cache.has_active_clients() and space_cache.is_expired():
+                logger.info("Updating cache due to active clients")
+                spaces = get_all_user_spaces()
+                space_cache.update_all(spaces)
+                socketio.emit('spaces_updated', {'timestamp': time.time()})
         except Exception as e:
-            logger.error(f"后台更新缓存失败: {e}")
-            time.sleep(60)  # 出错后等待1分钟再试
+            logger.error(f"Cache update failed: {e}")
+        time.sleep(60)  # 每分钟检查一次
 
-# 启动后台更新线程
-update_thread = threading.Thread(target=background_cache_update, daemon=True)
+# 启动缓存更新线程
+update_thread = threading.Thread(target=update_cache_if_needed, daemon=True)
 update_thread.start()
 
 @app.route("/", methods=["GET", "POST"])
@@ -213,4 +249,4 @@ def space_action(action_type, repo_id):
     return render_template("action_result.html", message=message)
 
 if __name__ == "__main__":
-    app.run(host='0.0.0.0', port=5000)
+    socketio.run(app, host='0.0.0.0', port=5000)
