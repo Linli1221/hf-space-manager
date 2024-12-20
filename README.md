@@ -2,6 +2,10 @@
 
 HF Space Manager 是一个用于管理 Hugging Face Spaces 的 Web 应用程序。它提供了直观的界面和API 接口，让你能够方便地查看和管理多个账号下的所有 Spaces。
 
+## 最近更新
+
+2024-12-20 space 信息修改为访问 dashboard 时才会后台自动更新
+
 ## 功能特点
 
 - 🚀 支持多个 HuggingFace 账号管理
@@ -117,8 +121,7 @@ curl -X POST "http://localhost:5000/api/v1/action/hf_token_here/username/space-n
 
 ### 缓存配置
 
-- 默认缓存时间：5 分钟
-- 后台自动更新间隔：5 分钟
+- 访问 dashboard 时后台自动更新
 
 ## 开发
 
