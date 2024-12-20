@@ -8,7 +8,7 @@ WORKDIR /app
 COPY . .
 
 # 安装项目依赖
-RUN pip install Flask python-dotenv huggingface_hub requests gunicorn
+RUN pip install Flask python-dotenv huggingface_hub requests gunicorn flask-socketio python-engineio python-socketio eventlet
 
 # 开放应用程序的端口
 EXPOSE 5000
@@ -20,4 +20,4 @@ EXPOSE 5000
 # ENV API_KEY=your_apikey
 
 # 定义启动命令
-CMD ["gunicorn", "--bind", "0.0.0.0:5000", "app:app"]
+CMD ["gunicorn", "--worker-class", "eventlet", "--bind", "0.0.0.0:5000", "app:app"]
