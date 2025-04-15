@@ -131,3 +131,27 @@ def rebuild_space(token, space_id):
             'success': False,
             'error': str(e)
         }), 500
+
+@api.route('/action/<token>/<path:space_id>/delete', methods=['POST'])
+@require_api_key
+def delete_space(token, space_id):
+    """删除空间"""
+    try:
+        hf_api = HfApi(token=token)
+        try:
+            hf_api.delete_repo(repo_id=space_id)
+            return jsonify({
+                'success': True,
+                'message': f'Space {space_id} deleted successfully'
+            })
+        except Exception as e:
+            return jsonify({
+                'success': False,
+                'error': str(e)
+            }), 400
+
+    except Exception as e:
+        return jsonify({
+            'success': False,
+            'error': str(e)
+        }), 500

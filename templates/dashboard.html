@@ -238,6 +238,15 @@
         .rebuild:hover {
             background: #e5e5e7;
         }
+        
+        .delete {
+            background: #ff3b30;
+            color: white;
+        }
+
+        .delete:hover {
+            background: #ff453a;
+        }
 
         .footer {
             text-align: center;
@@ -328,6 +337,7 @@
                                 <a href="{{ space.url }}" target="_blank" class="action-button view">查看</a>
                                 <button onclick="confirmAction('restart', '{{ space.repo_id }}')" class="action-button restart">重启</button>
                                 <button onclick="confirmAction('rebuild', '{{ space.repo_id }}')" class="action-button rebuild">重建</button>
+                                <button onclick="confirmAction('delete', '{{ space.repo_id }}')" class="action-button delete">删除</button>
                             </div>
                         </div>
                         {% endfor %}
@@ -398,8 +408,11 @@
 
         // 在进行操作时显示加载动画
         function confirmAction(action, spaceId) {
-            var actionText = action === 'restart' ? '重启' : '重建';
-            if (confirm(`确定要${actionText} "${spaceId}" 吗？`)) {document.getElementById('loading').style.display = 'flex';
+            var actionText = action === 'restart' ? '重启' : 
+                            action === 'rebuild' ? '重建' : 
+                            action === 'delete' ? '删除' : '';
+            if (confirm(`确定要${actionText} "${spaceId}" 吗？${action === 'delete' ? '\n警告：此操作不可逆！' : ''}`)) {
+                document.getElementById('loading').style.display = 'flex';
                 window.location.href = `/action/${action}/${spaceId}`;
             }
         }

@@ -103,7 +103,14 @@ curl -X POST "http://localhost:5000/api/v1/action/hf_token_here/username/space-n
 
 #### 4. 重建 Space
 ```bash
-curl -X POST "http://localhost:5000/api/v1/action/hf_token_here/username/space-name/restart" \
+curl -X POST "http://localhost:5000/api/v1/action/hf_token_here/username/space-name/rebuild" \
+-H "Content-Type: application/json" \
+-H "Authorization: Bearer API_KEY"
+```
+
+#### 5. 删除 Space
+```bash
+curl -X POST "http://localhost:5000/api/v1/action/hf_token_here/username/space-name/delete" \
 -H "Content-Type: application/json" \
 -H "Authorization: Bearer API_KEY"
 ```
@@ -122,6 +129,44 @@ curl -X POST "http://localhost:5000/api/v1/action/hf_token_here/username/space-n
 ### 缓存配置
 
 - 访问 dashboard 时后台自动更新
+
+## Docker 自动化构建
+
+本项目设置了GitHub Actions自动化工作流程，可以自动构建Docker镜像并推送到GitHub Container Registry (ghcr.io)。
+
+### 设置说明
+
+1. GitHub Actions自动使用仓库的权限推送镜像到ghcr.io，无需额外设置密钥。
+2. 确保仓库设置中已启用了GitHub Actions和包的读写权限。
+
+3. 触发构建的方式：
+   - 向`main`或`master`分支推送代码
+   - 创建以`v`开头的标签（如`v1.0.0`）
+   - 创建Pull Request到`main`或`master`分支
+   - 手动在GitHub Actions页面触发工作流
+
+### 镜像标签
+
+自动构建的Docker镜像将使用以下标签策略：
+- 分支推送：`ghcr.io/{username}/hf-space-manager:{分支名}`
+- 标签推送：`ghcr.io/{username}/hf-space-manager:{版本号}`, `ghcr.io/{username}/hf-space-manager:{主版本号}.{次版本号}`
+- 主分支推送：额外添加`ghcr.io/{username}/hf-space-manager:latest`标签
+- 所有推送：添加`ghcr.io/{username}/hf-space-manager:sha-{提交哈希值}`标签
+
+### 使用Docker镜像
+
+```bash
+docker run -d \
+    --name hfspace-manager \
+    -p 5000:5000 \
+    -e USERNAME=your_username \
+    -e PASSWORD=your_password \
+    -e HF_TOKENS=token1,token2,token3 \
+    -e API_KEY=your_api_key \
+    ghcr.io/{username}/hf-space-manager:latest
+```
+
+请将`{username}`替换为您的GitHub用户名。
 
 ## 开发
 

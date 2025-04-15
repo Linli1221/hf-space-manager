@@ -231,6 +231,14 @@ def rebuild_space(repo_id, token):
     except Exception as e:
         return f"重建 Space {repo_id} 失败: {e}"
 
+def delete_space(repo_id, token):
+    try:
+        hf_api = HfApi(token=token)
+        hf_api.delete_repo(repo_id=repo_id)
+        return f"成功删除 Space: {repo_id}"
+    except Exception as e:
+        return f"删除 Space {repo_id} 失败: {e}"
+
 @app.route("/action/<action_type>/<path:repo_id>")
 @login_required
 def space_action(action_type, repo_id):
@@ -244,6 +252,8 @@ def space_action(action_type, repo_id):
         message = restart_space(repo_id, space["token"])
     elif action_type == "rebuild":
         message = rebuild_space(repo_id, space["token"])
+    elif action_type == "delete":
+        message = delete_space(repo_id, space["token"])
     else:
         message = "未知操作"
     return render_template("action_result.html", message=message)
