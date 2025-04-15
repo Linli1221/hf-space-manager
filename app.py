@@ -246,6 +246,12 @@ def delete_space(repo_id, token):
         # Space存在，尝试删除
         try:
             hf_api.delete_repo(repo_id=repo_id, repo_type="space")
+            # 删除成功后，清除缓存，强制重新获取Space列表
+            with space_cache.lock:
+                space_cache.spaces = {}
+                space_cache.last_update = None
+            # 通知所有客户端刷新
+            socketio.emit('spaces_updated', {'timestamp': time.time()})
             return f"成功删除 Space: {repo_id}"
         except Exception as e:
             error_message = str(e)
