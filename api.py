@@ -138,17 +138,43 @@ def delete_space(token, space_id):
     """删除空间"""
     try:
         hf_api = HfApi(token=token)
+        
+        # 先检查space是否存在
         try:
-            hf_api.delete_repo(repo_id=space_id)
+            space_info = hf_api.space_info(repo_id=space_id)
+        except Exception as e:
+            if "404" in str(e) or "not found" in str(e).lower():
+                return jsonify({
+                    'success': False,
+                    'error': f'Space {space_id} 不存在'
+                }), 404
+            return jsonify({
+                'success': False,
+                'error': f'检查Space信息失败: {str(e)}'
+            }), 400
+        
+        # Space存在，尝试删除
+        try:
+            hf_api.delete_repo(repo_id=space_id, repo_type="space")
             return jsonify({
                 'success': True,
                 'message': f'Space {space_id} deleted successfully'
             })
         except Exception as e:
+            error_message = str(e)
+            status_code = 400
+            
+            if "404" in error_message:
+                status_code = 404
+                if "Repository Not Found" in error_message:
+                    error_message = f'Space {space_id} 不存在或您没有删除权限'
+                else:
+                    error_message = f'API路径不正确，请联系管理员'
+            
             return jsonify({
                 'success': False,
-                'error': str(e)
-            }), 400
+                'error': error_message
+            }), status_code
 
     except Exception as e:
         return jsonify({

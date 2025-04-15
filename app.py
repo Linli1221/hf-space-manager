@@ -234,10 +234,29 @@ def rebuild_space(repo_id, token):
 def delete_space(repo_id, token):
     try:
         hf_api = HfApi(token=token)
-        hf_api.delete_repo(repo_id=repo_id)
-        return f"成功删除 Space: {repo_id}"
+        
+        # 先检查space是否存在
+        try:
+            space_info = hf_api.space_info(repo_id=repo_id)
+        except Exception as e:
+            if "404" in str(e) or "not found" in str(e).lower():
+                return f"删除Space失败: Space {repo_id} 不存在"
+            return f"检查Space {repo_id} 信息失败: {e}"
+        
+        # Space存在，尝试删除
+        try:
+            hf_api.delete_repo(repo_id=repo_id, repo_type="space")
+            return f"成功删除 Space: {repo_id}"
+        except Exception as e:
+            error_message = str(e)
+            if "404" in error_message:
+                if "Repository Not Found" in error_message:
+                    return f"删除Space失败: Space {repo_id} 不存在或您没有删除权限"
+                else:
+                    return f"删除Space失败: API路径不正确，请联系管理员"
+            return f"删除 Space {repo_id} 失败: {e}"
     except Exception as e:
-        return f"删除 Space {repo_id} 失败: {e}"
+        return f"删除 Space {repo_id} 操作失败: {e}"
 
 @app.route("/action/<action_type>/<path:repo_id>")
 @login_required
